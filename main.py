@@ -85,18 +85,17 @@ def get_images_paths(images_directories):
     return images_paths
 
 
-def send_picture_to_telegram(images_paths, tg_token):
-
-
+def send_pictures_to_telegram(images_paths, tg_token, time_sleep):
     bot = telegram.Bot(token=tg_token)
     while True:
         for path in images_paths:
             bot.send_document(chat_id="@best_space_images",
                               document=open(path, "rb"))
-            time.sleep(86400)
+            time.sleep(time_sleep)
 
 
 def main():
+    time_sleep = 86400
     load_dotenv()
     tg_token = os.getenv("TG_TOKEN")
     nasa_api_key = os.getenv("NASA_API_KEY")
@@ -118,7 +117,7 @@ def main():
     fetch_nasa_image(nasa_url, nasa_path, nasa_api_key)
     fetch_epic_image(nasa_epic_url, nasa_epic_path, nasa_api_key)
     images_paths = get_images_paths(images_directories)
-    send_picture_to_telegram(images_paths, tg_token)
+    send_pictures_to_telegram(images_paths, tg_token, time_sleep)
 
 
 if __name__ == "__main__":
