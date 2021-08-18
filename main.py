@@ -13,7 +13,7 @@ def fetch_spacex_last_launch(path):
     spacex_url = "https://api.spacexdata.com/v4/launches/latest"
     response = requests.get(spacex_url)
     response.raise_for_status()
-    links = json.loads(response.text)["links"]["flickr"]["original"]
+    links = response.json()["links"]["flickr"]["original"]
     for link_number, link in enumerate(links):
         response = requests.get(link)
         response.raise_for_status()
@@ -40,8 +40,7 @@ def get_images_links(nasa_url, nasa_api_key):
         "count": str(links_number),
         "api_key": nasa_api_key
     }
-    raw_response = requests.get(nasa_url, params=payload)
-    response = json.loads(raw_response.text)
+    response = requests.get(nasa_url, params=payload).json()
     images_links = [link["url"] for link in response]
     return images_links
 
@@ -60,9 +59,8 @@ def fetch_nasa_image(path, nasa_api_key):
 def fetch_epic_image(path, nasa_api_key):
     payload = {"api_key": nasa_api_key}
     nasa_epic_url = "https://api.nasa.gov/EPIC/api/natural/images"
-    raw_response = requests.get(nasa_epic_url, params=payload)
-    raw_response.raise_for_status()
-    response = json.loads(raw_response.text)
+    response = requests.get(nasa_epic_url, params=payload).json()
+    response.raise_for_status()
     for image_number, image_data in enumerate(response):
         image_date = image_data["date"]
         image_name = image_data["image"]
