@@ -59,8 +59,9 @@ def fetch_nasa_image(path, nasa_api_key):
 def fetch_epic_image(path, nasa_api_key):
     payload = {"api_key": nasa_api_key}
     nasa_epic_url = "https://api.nasa.gov/EPIC/api/natural/images"
-    response = requests.get(nasa_epic_url, params=payload).json()
+    response = requests.get(nasa_epic_url, params=payload)
     response.raise_for_status()
+    response = response.json()
     for image_number, image_data in enumerate(response):
         image_date = image_data["date"]
         image_name = image_data["image"]
