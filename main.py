@@ -5,83 +5,85 @@ import time
 import telegram
 
 from os import listdir
-from urllib.parse import urlparse
+from urllib import parse
 from dotenv import load_dotenv
 
 
-def fetch_spacex_last_launch(url, path):
-    response = requests.get(url)
+def fetch_spacex_last_launch(path):
+    spacex_url = "https://api.spacexdata.com/v4/launches/latest"
+    response = requests.get(spacex_url)
     response.raise_for_status()
     links = json.loads(response.text)["links"]["flickr"]["original"]
     for link_number, link in enumerate(links):
         response = requests.get(link)
+        response.raise_for_status()
         with open(f"{path}spacex{link_number}.jpg", "wb") as file:
             file.write(response.content)
 
 
 def get_extension(url):
-    path, extension = os.path.splitext(url)
+    unquoted_url = parse.unquote(url)
+    path = parse.urlparse(unquoted_url).path
+    extension = path.rstrip("/").split(".")[-1]
     return extension
 
 
 def get_name(url):
     name, path = os.path.split(url)
-    name = urlparse(url)
+    name = parse.urlparse(url)
     return name.netloc
 
 
 def get_images_links(nasa_url, nasa_api_key):
+    links_number = 30
     payload = {
-        "count": "30",
+        "count": str(links_number),
         "api_key": nasa_api_key
     }
     raw_response = requests.get(nasa_url, params=payload)
     response = json.loads(raw_response.text)
-    images_links = []
-    for link in response:
-        images_links.append(link["url"])
+    images_links = [link["url"] for link in response]
     return images_links
 
 
-def fetch_nasa_image(nasa_url, path, nasa_api_key):
+def fetch_nasa_image(path, nasa_api_key):
+    nasa_url = "https://api.nasa.gov/planetary/apod"
     for link_number, link in enumerate(get_images_links(nasa_url, nasa_api_key)):
         if get_name(link) == "apod.nasa.gov":
             response = requests.get(link)
+            response.raise_for_status()
             extension = get_extension(link)
             with open(f"{path}nasa{link_number}{extension}", "wb") as file:
                 file.write(response.content)
 
 
-def fetch_epic_image(url, path, nasa_api_key):
-    raw_response = requests.get(url)
+def fetch_epic_image(path, nasa_api_key):
+    payload = {"api_key": nasa_api_key}
+    nasa_epic_url = "https://api.nasa.gov/EPIC/api/natural/images"
+    raw_response = requests.get(nasa_epic_url, params=payload)
+    raw_response.raise_for_status()
     response = json.loads(raw_response.text)
     for image_number, image_data in enumerate(response):
         image_date = image_data["date"]
         image_name = image_data["image"]
-        link = requests.get(make_epic_image_link(image_date, image_name, nasa_api_key))
+        link = requests.get(make_epic_image_link(image_date, image_name),
+                            params=payload)
         with open(f"{path}epic_nasa{image_number}.jpg", "wb") as file:
             file.write(link.content)
 
 
-def make_epic_image_link(image_date, image_name, nasa_api_key):
-    image_date = date_convertor(image_date)
+def make_epic_image_link(image_date, image_name,):
+    image_date = image_date.split()[0].replace("-", "/")
     link = "https://api.nasa.gov/EPIC/archive/natural/" \
-           + "{}/png/{}.png?api_key={}".format(image_date, image_name, nasa_api_key)
+        f"{image_date}/png/{image_name}.png"
     return link
-
-
-def date_convertor(image_date):
-    converted_image_date = image_date.split()[0].replace("-", "/")
-    return converted_image_date
 
 
 def get_images_paths(images_directories):
     images_paths = []
     for images_dir in images_directories:
         images = listdir(images_dir)
-        for image in images:
-            image_path = image.replace(image, f"{images_dir}/{image}")
-            images_paths.append(image_path)
+        images_paths = [f"{images_dir}/{image}" for image in images]
     return images_paths
 
 
@@ -101,21 +103,14 @@ def main():
     nasa_api_key = os.getenv("NASA_API_KEY")
     images_directories = ["spacex_images", "nasa_images", "nasa_epic_images"]
     spacex_path = "spacex_images/"
-    spacex_url = "https://api.spacexdata.com/v4/launches/latest"
     nasa_path = "nasa_images/"
     nasa_epic_path = "nasa_epic_images/"
-    nasa_url = "https://api.nasa.gov/planetary/apod"
-    nasa_epic_url = "https://api.nasa.gov/EPIC/api/" \
-                    + "natural/images?api_key={}".format(nasa_api_key)
-    try:
-        os.makedirs("spacex_images")
-        os.makedirs("nasa_images")
-        os.makedirs("nasa_epic_images")
-    except FileExistsError:
-        None
-    fetch_spacex_last_launch(spacex_url, spacex_path)
-    fetch_nasa_image(nasa_url, nasa_path, nasa_api_key)
-    fetch_epic_image(nasa_epic_url, nasa_epic_path, nasa_api_key)
+    os.makedirs("spacex_images", exist_ok=True)
+    os.makedirs("nasa_images", exist_ok=True)
+    os.makedirs("nasa_epic_images", exist_ok=True)
+    fetch_spacex_last_launch(spacex_path)
+    fetch_nasa_image(nasa_path, nasa_api_key)
+    fetch_epic_image(nasa_epic_path, nasa_api_key)
     images_paths = get_images_paths(images_directories)
     send_pictures_to_telegram(images_paths, tg_token, time_sleep)
 
