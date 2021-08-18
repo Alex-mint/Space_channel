@@ -27,6 +27,33 @@ Python3 должен быть уже установлен.
 ```python
 pip install - r requirements.txt
 ```
+
+### Примерно запуска кода
+
+```python
+def main():
+    time_sleep = 86400
+    load_dotenv()
+    tg_token = os.getenv("TG_TOKEN")
+    nasa_api_key = os.getenv("NASA_API_KEY")
+    images_directories = ["spacex_images", "nasa_images", "nasa_epic_images"]
+    spacex_path = "spacex_images/"
+    nasa_path = "nasa_images/"
+    nasa_epic_path = "nasa_epic_images/"
+    os.makedirs("spacex_images", exist_ok=True)
+    os.makedirs("nasa_images", exist_ok=True)
+    os.makedirs("nasa_epic_images", exist_ok=True)
+    fetch_spacex_last_launch(spacex_path)
+    fetch_nasa_image(nasa_path, nasa_api_key)
+    fetch_epic_image(nasa_epic_path, nasa_api_key)
+    images_paths = get_images_paths(images_directories)
+    send_pictures_to_telegram(images_paths, tg_token, time_sleep)
+
+
+if __name__ == "__main__":
+    main()
+```
+
 ### Цель проекта
 
 Код написан в образовательных целях на онлайн-курсе для веб-разработчиков [dvmn.org](https://devman.org/).
