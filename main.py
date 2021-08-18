@@ -29,9 +29,8 @@ def get_extension(url):
 
 
 def get_name(url):
-    name, path = os.path.split(url)
     name = parse.urlparse(url)
-    return name.netloc
+    if name.netloc == "apod.nasa.gov": return name.netloc
 
 
 def get_images_links(nasa_url, nasa_api_key):
@@ -45,15 +44,20 @@ def get_images_links(nasa_url, nasa_api_key):
     return images_links
 
 
+def download_nasa_image(path, link, link_number):
+    response = requests.get(link)
+    response.raise_for_status()
+    extension = get_extension(link)
+    print(extension)
+    with open(f"{path}nasa{link_number}{extension}", "wb") as file:
+        file.write(response.content)
+
+
 def fetch_nasa_image(path, nasa_api_key):
     nasa_url = "https://api.nasa.gov/planetary/apod"
     for link_number, link in enumerate(get_images_links(nasa_url, nasa_api_key)):
-        if get_name(link) == "apod.nasa.gov":
-            response = requests.get(link)
-            response.raise_for_status()
-            extension = get_extension(link)
-            with open(f"{path}nasa{link_number}{extension}", "wb") as file:
-                file.write(response.content)
+        if get_name(link) == "apod.nasa.gov": download_nasa_image(path, link,
+                                                                  link_number)
 
 
 def fetch_epic_image(path, nasa_api_key):
