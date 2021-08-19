@@ -4,10 +4,11 @@
 
 Скрипт автоматически собирает фотографии космоса с сайтов [spacex.com](https://www.spacex.com/) и [nasa.gov](https://www.nasa.gov/?kscnasa.rm). Бот публикует эти фотографии на твоём телеграм канале,  для этого бот нужно назначить администратором канала.
 
-Программа берет настройки из нестандартных переменных окружения. Перед запуском программы создаём фаил `.env` и ложим туда свой Nasa API ключ и токен телеграм бота который нужно создать.
+Программа берет настройки из нестандартных переменных окружения. Перед запуском программы создаём фаил `.env` и ложим туда свой Nasa API ключ, токен телеграм бота который нужно создать и id чата.
 ```python
 NASA_API_KEY=nasa_api-key
 TG_TOKEN=tg_token
+TG_CHAT_ID=@tg_chat_id
 ``` 
 Без него программа не запустится.
 
@@ -28,30 +29,10 @@ Python3 должен быть уже установлен.
 pip install - r requirements.txt
 ```
 
-### Примерно запуска кода
+### Пример запуска кода
 
 ```python
-def main():
-    time_sleep = 86400
-    load_dotenv()
-    tg_token = os.getenv("TG_TOKEN")
-    nasa_api_key = os.getenv("NASA_API_KEY")
-    images_directories = ["spacex_images", "nasa_images", "nasa_epic_images"]
-    spacex_path = "spacex_images/"
-    nasa_path = "nasa_images/"
-    nasa_epic_path = "nasa_epic_images/"
-    os.makedirs("spacex_images", exist_ok=True)
-    os.makedirs("nasa_images", exist_ok=True)
-    os.makedirs("nasa_epic_images", exist_ok=True)
-    fetch_spacex_last_launch(spacex_path)
-    fetch_nasa_image(nasa_path, nasa_api_key)
-    fetch_epic_image(nasa_epic_path, nasa_api_key)
-    images_paths = get_images_paths(images_directories)
-    send_pictures_to_telegram(images_paths, tg_token, time_sleep)
-
-
-if __name__ == "__main__":
-    main()
+python main.py
 ```
 
 ### Цель проекта
