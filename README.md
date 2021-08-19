@@ -8,7 +8,7 @@
 ```python
 NASA_API_KEY=nasa_api-key
 TG_TOKEN=tg_token
-TG_CHAT_ID=@tg_chat_id
+TG_CHAT_ID=tg_chat_id
 ``` 
 Без него программа не запустится.
 
