@@ -7,7 +7,7 @@ from urllib import parse
 from dotenv import load_dotenv
 
 
-def fetch_spacex_last_launch_links(path):
+def fetch_spacex_last_launch_images(path):
     spacex_url = "https://api.spacexdata.com/v4/launches/latest"
     response = requests.get(spacex_url)
     response.raise_for_status()
@@ -24,10 +24,7 @@ def get_extension(url):
 
 def get_image_links(nasa_url, nasa_api_key):
     links_number = 30
-    payload = {
-        "count": str(links_number),
-        "api_key": nasa_api_key
-    }
+    payload = {"count": str(links_number), "api_key": nasa_api_key}
     response = requests.get(nasa_url, params=payload)
     response.raise_for_status()
     response = response.json()
@@ -46,7 +43,7 @@ def download_image(path, links, payload=None):
             file.write(response.content)
 
 
-def fetch_nasa_images_links(path, nasa_api_key):
+def fetch_nasa_images(path, nasa_api_key):
     nasa_url = "https://api.nasa.gov/planetary/apod"
     nasa_image_links = get_image_links(nasa_url, nasa_api_key)
     for link in nasa_image_links:
@@ -55,7 +52,7 @@ def fetch_nasa_images_links(path, nasa_api_key):
     download_image(path, nasa_image_links)
 
 
-def fetch_epic_images_links(path, nasa_api_key):
+def fetch_epic_images(path, nasa_api_key):
     payload = {"api_key": nasa_api_key}
     nasa_epic_url = "https://api.nasa.gov/EPIC/api/natural/images"
     response = requests.get(nasa_epic_url, params=payload)
@@ -70,7 +67,10 @@ def fetch_epic_images_links(path, nasa_api_key):
     download_image(path, links, payload=payload)
 
 
-def make_epic_image_link(image_date, image_name,):
+def make_epic_image_link(
+    image_date,
+    image_name,
+):
     image_date = image_date.split()[0].replace("-", "/")
     link = "https://api.nasa.gov/EPIC/archive/natural/" \
         f"{image_date}/png/{image_name}.png"
@@ -91,7 +91,8 @@ def send_pictures_to_telegram(image_paths, tg_token, tg_chat_id, sleep_time):
     while True:
         for path in image_paths:
             with open(path, "rb") as file:
-                bot.send_document(chat_id=tg_chat_id, document=open(path, "rb"))
+                bot.send_document(chat_id=tg_chat_id,
+                                  document=open(path, "rb"))
                 time.sleep(sleep_time)
 
 
@@ -111,9 +112,9 @@ def main():
     nasa_path = "nasa_images"
     nasa_epic_path = "epic_images"
 
-    fetch_spacex_last_launch_links(spacex_path)
-    fetch_nasa_images_links(nasa_path, nasa_api_key)
-    fetch_epic_images_links(nasa_epic_path, nasa_api_key)
+    fetch_spacex_last_launch_images(spacex_path)
+    fetch_nasa_images(nasa_path, nasa_api_key)
+    fetch_epic_images(nasa_epic_path, nasa_api_key)
 
     image_paths = get_image_paths(image_directories)
     send_pictures_to_telegram(image_paths, tg_token, tg_chat_id, sleep_time)
