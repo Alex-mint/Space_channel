@@ -15,7 +15,7 @@ TG_CHAT_ID=tg_chat_id
 Так же можно изменить периодичность публикации изменив значение переменной `time_sleep` (значение в секундах)
 ```python
 def main():                                 
-    time_sleep = 86400                      
+    sleep_time = 86400                      
     load_dotenv()                           
     tg_token = os.getenv("TG_TOKEN")        
     nasa_api_key = os.getenv("NASA_API_KEY")
