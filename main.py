@@ -28,8 +28,8 @@ def get_image_links(nasa_url, nasa_api_key):
     response = requests.get(nasa_url, params=payload)
     response.raise_for_status()
     response = response.json()
-    images_links = [link["url"] for link in response]
-    return images_links
+    image_links = [link["url"] for link in response]
+    return image_links
 
 
 def download_image(path, links, payload=None):
