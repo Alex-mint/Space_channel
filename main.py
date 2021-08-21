@@ -59,7 +59,7 @@ def fetch_epic_images(path, nasa_api_key):
     response.raise_for_status()
     response = response.json()
     links = []
-    for image_number, image in enumerate(response):
+    for image in response:
         image_date = image["date"]
         image_name = image["image"]
         link = make_epic_image_link(image_date, image_name)
