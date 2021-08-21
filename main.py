@@ -69,10 +69,7 @@ def fetch_epic_images(path, nasa_api_key):
     download_images(path, links, image_name, payload=payload)
 
 
-def make_epic_image_link(
-    image_date,
-    image_name,
-):
+def make_epic_image_link(image_date, image_name):
     image_date = image_date.split()[0].replace("-", "/")
     link = "https://api.nasa.gov/EPIC/archive/natural/" \
         f"{image_date}/png/{image_name}.png"
