@@ -91,7 +91,7 @@ def send_pictures_to_telegram(image_paths, tg_token, tg_chat_id, sleep_time):
         for path in image_paths:
             with open(path, "rb") as file:
                 bot.send_document(chat_id=tg_chat_id, document=file)
-                time.sleep(sleep_time)
+    time.sleep(sleep_time)
 
 
 def main():
