@@ -8,11 +8,12 @@ from dotenv import load_dotenv
 
 
 def fetch_spacex_last_launch_images(path):
+    image_name = "spacex"
     spacex_url = "https://api.spacexdata.com/v4/launches/latest"
     response = requests.get(spacex_url)
     response.raise_for_status()
     links = response.json()["links"]["flickr"]["original"]
-    download_images(path, links)
+    download_images(path, links, image_name)
 
 
 def get_extension(url):
@@ -32,8 +33,7 @@ def get_image_links(nasa_url, nasa_api_key):
     return image_links
 
 
-def download_images(path, links, payload=None):
-    image_name = path.split("_")[0]
+def download_images(path, links, image_name, payload=None):
     path = os.path.join(path, image_name)
     for link_number, link in enumerate(links):
         extension = get_extension(link)
@@ -44,12 +44,13 @@ def download_images(path, links, payload=None):
 
 
 def fetch_nasa_images(path, nasa_api_key):
+    image_name = "nasa"
     nasa_url = "https://api.nasa.gov/planetary/apod"
     nasa_image_links = get_image_links(nasa_url, nasa_api_key)
     for link in nasa_image_links:
         if parse.urlparse(link).netloc != "apod.nasa.gov":
             nasa_image_links.remove(link)
-    download_images(path, nasa_image_links)
+    download_images(path, nasa_image_links, image_name)
 
 
 def fetch_epic_images(path, nasa_api_key):
@@ -64,7 +65,8 @@ def fetch_epic_images(path, nasa_api_key):
         image_name = image["image"]
         link = make_epic_image_link(image_date, image_name)
         links.append(link)
-    download_images(path, links, payload=payload)
+    image_name = "epic"
+    download_images(path, links, image_name, payload=payload)
 
 
 def make_epic_image_link(
@@ -91,8 +93,7 @@ def send_pictures_to_telegram(image_paths, tg_token, tg_chat_id, sleep_time):
     while True:
         for path in image_paths:
             with open(path, "rb") as file:
-                bot.send_document(chat_id=tg_chat_id,
-                                  document=file)
+                bot.send_document(chat_id=tg_chat_id, document=file)
                 time.sleep(sleep_time)
 
 
